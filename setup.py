@@ -35,7 +35,8 @@ setup(
         'pyyaml',
         'tzlocal',
         'Click',
-        'six'
+        'six',
+        'vobject'
     ],
    **metadata_
 )
