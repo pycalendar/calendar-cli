@@ -26,7 +26,7 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: CGI Tools/Libraries",
     ],
-    scripts=['bin/calendar-cli.py', 'bin/calendar-cli', 'bin/calendar-ai'],
+    scripts=['bin/calendar-cli.py', 'bin/calendar-cli', 'bin/calendar-ai', 'bin/calendar-ai-gui'],
     install_requires=[
         'icalendar',
         'caldav>=0.12-dev0',

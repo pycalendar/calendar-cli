@@ -57,7 +57,52 @@ pip install SpeechRecognition pyaudio
 
 ## 🎯 Utilisation
 
-### Mode texte (recommandé)
+### Interface graphique (GUI) - NOUVEAU ! 🎨
+
+Une interface minimaliste pour rester dans un coin de votre bureau :
+
+```bash
+# Lancer l'interface graphique
+calendar-ai-gui
+```
+
+**Fonctionnalités de l'interface :**
+- 📝 Zone de texte pour saisie en langage naturel
+- ➕ Bouton pour ajouter instantanément
+- 🎤 Bouton pour saisie vocale
+- 📜 Historique des ajouts récents
+- 📌 Option "Toujours au premier plan" (activée par défaut)
+- 🎨 Design sombre et minimaliste
+- ⌨️ Raccourci clavier : Entrée pour ajouter, Shift+Entrée pour nouvelle ligne
+
+**Capture d'écran conceptuelle :**
+```
+┌─────────────────────────────────┐
+│   📅 Calendar AI                │
+│   🟢 Connecté à Ollama (llama2) │
+├─────────────────────────────────┤
+│ Décrivez votre événement :      │
+│ ┌─────────────────────────────┐ │
+│ │ Réunion demain à 14h       │ │
+│ └─────────────────────────────┘ │
+│  [➕ Ajouter]  [🎤 Vocal]       │
+├─────────────────────────────────┤
+│ Historique récent :             │
+│ ┌─────────────────────────────┐ │
+│ │ [14:23:12] 📝 Réunion...   │ │
+│ │ [14:23:15] ✓ Ajouté: Réu...│ │
+│ │ [14:24:01] 📝 Acheter pain │ │
+│ │ [14:24:03] ✓ Ajouté: Ach...│ │
+│ └─────────────────────────────┘ │
+│ ☑ Toujours au premier plan 🗑️  │
+└─────────────────────────────────┘
+```
+
+L'interface se positionne automatiquement dans le coin supérieur droit de votre écran et reste accessible en permanence !
+
+### Mode ligne de commande
+
+#### Mode texte (recommandé)
 
 ```bash
 # Événements
@@ -71,7 +116,7 @@ calendar-ai "Finir le rapport pour vendredi"
 calendar-ai "Appeler le plombier demain matin"
 ```
 
-### Mode vocal (optionnel)
+#### Mode vocal (optionnel)
 
 ```bash
 # Activer le microphone et parler

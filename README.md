@@ -74,7 +74,10 @@ ollama pull llama2
 # Install the Ollama integration dependencies
 pip install -r requirements-ollama.txt
 
-# Use natural language to add events and tasks!
+# Option 1: Graphical interface (minimal, always-on-top widget)
+calendar-ai-gui
+
+# Option 2: Command-line interface
 calendar-ai "Rendez-vous dentiste demain à 14h"
 calendar-ai "Réunion équipe lundi 10h pour 2 heures"
 calendar-ai "Acheter du pain"
