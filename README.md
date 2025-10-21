@@ -55,6 +55,37 @@ Installation
 "sudo ./setup.py install" should take care of all those eventually, and will
 also make an executable under /usr/bin
 
+Natural Language Interface with Ollama (NEW!)
+----------------------------------------------
+
+**calendar-cli** now supports adding events and tasks using natural language,
+powered by [Ollama](https://ollama.ai/)!
+
+Quick start:
+
+```sh
+# Install Ollama (https://ollama.ai/)
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Start Ollama and pull a model
+ollama serve
+ollama pull llama2
+
+# Install the Ollama integration dependencies
+pip install -r requirements-ollama.txt
+
+# Use natural language to add events and tasks!
+calendar-ai "Rendez-vous dentiste demain à 14h"
+calendar-ai "Réunion équipe lundi 10h pour 2 heures"
+calendar-ai "Acheter du pain"
+calendar-ai "Finir le rapport pour vendredi"
+
+# Voice mode (optional, requires SpeechRecognition)
+calendar-ai --voice
+```
+
+For complete documentation, see [OLLAMA_INTEGRATION.md](OLLAMA_INTEGRATION.md)
+
 Support
 -------
 

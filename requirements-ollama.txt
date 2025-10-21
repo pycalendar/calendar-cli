@@ -1,0 +1,15 @@
+# Requirements for Ollama integration with calendar-cli
+# Install with: pip install -r requirements-ollama.txt
+
+# Core dependency for Ollama API communication
+requests>=2.25.0
+
+# Optional: Voice recognition support
+# Uncomment to enable voice mode (requires portaudio system library)
+# SpeechRecognition>=3.8.0
+# pyaudio>=0.2.11
+
+# Note: Make sure you have Ollama installed and running
+# Download from: https://ollama.ai/
+# Start with: ollama serve
+# Install a model: ollama pull llama2

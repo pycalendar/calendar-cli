@@ -1,0 +1,276 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+calendar-ai: Natural language interface for calendar-cli using Ollama
+"""
+
+import sys
+import argparse
+import os
+from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from calendar_cli.ollama_integration import (
+    OllamaClient,
+    NaturalLanguageParser,
+    format_for_calendar_cli,
+    test_ollama_connection
+)
+from calendar_cli import legacy
+from calendar_cli.config import read_config
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Ajouter des événements et tâches en langage naturel avec Ollama",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Exemples:
+  calendar-ai "Rendez-vous dentiste demain à 14h"
+  calendar-ai "Réunion équipe lundi 10h pour 2 heures"
+  calendar-ai "Acheter du pain"
+  calendar-ai "Finir le rapport pour vendredi"
+  calendar-ai --voice  # Mode vocal (nécessite speech_recognition)
+
+Configuration:
+  Le script utilise la configuration de calendar-cli (~/.config/calendar.conf)
+
+  Vous pouvez également configurer:
+  - OLLAMA_HOST: URL de l'API Ollama (défaut: http://localhost:11434)
+  - OLLAMA_MODEL: Modèle à utiliser (défaut: llama2)
+"""
+    )
+
+    parser.add_argument(
+        'text',
+        nargs='*',
+        help="Texte en langage naturel décrivant l'événement ou la tâche"
+    )
+
+    parser.add_argument(
+        '--voice',
+        action='store_true',
+        help="Mode vocal (nécessite le module speech_recognition et un microphone)"
+    )
+
+    parser.add_argument(
+        '--model',
+        default=os.environ.get('OLLAMA_MODEL', 'llama2'),
+        help="Modèle Ollama à utiliser (défaut: llama2)"
+    )
+
+    parser.add_argument(
+        '--ollama-host',
+        default=os.environ.get('OLLAMA_HOST', 'http://localhost:11434'),
+        help="URL de l'API Ollama (défaut: http://localhost:11434)"
+    )
+
+    parser.add_argument(
+        '--test-connection',
+        action='store_true',
+        help="Tester la connexion à Ollama et quitter"
+    )
+
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help="Afficher la commande qui serait exécutée sans l'exécuter"
+    )
+
+    parser.add_argument(
+        '--config-section',
+        default='default',
+        help="Section de configuration à utiliser (défaut: default)"
+    )
+
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help="Afficher les informations de débogage"
+    )
+
+    args = parser.parse_args()
+
+    # Test connection if requested
+    if args.test_connection:
+        ollama = OllamaClient(args.ollama_host)
+        test_ollama_connection()
+        sys.exit(0 if ollama.is_available() else 1)
+
+    # Get text input
+    if args.voice:
+        text = get_voice_input()
+        if not text:
+            print("Erreur: Impossible de capturer la voix", file=sys.stderr)
+            sys.exit(1)
+        print(f"Texte capturé: {text}")
+    elif args.text:
+        text = ' '.join(args.text)
+    else:
+        parser.print_help()
+        sys.exit(1)
+
+    # Initialize Ollama client
+    ollama = OllamaClient(args.ollama_host)
+
+    if not ollama.is_available():
+        print("Erreur: Ollama n'est pas accessible", file=sys.stderr)
+        print(f"Vérifiez que Ollama est en cours d'exécution sur {args.ollama_host}", file=sys.stderr)
+        print("Démarrez-le avec: ollama serve", file=sys.stderr)
+        sys.exit(1)
+
+    # Check if model is available
+    available_models = ollama.list_models()
+    if args.model not in [m.split(':')[0] for m in available_models]:
+        print(f"Avertissement: Le modèle '{args.model}' n'est peut-être pas installé", file=sys.stderr)
+        print(f"Modèles disponibles: {', '.join(available_models)}", file=sys.stderr)
+        print(f"Installez-le avec: ollama pull {args.model}", file=sys.stderr)
+        # Continue anyway, Ollama will try to pull it
+
+    # Parse natural language
+    print(f"Analyse du texte avec {args.model}...")
+    parser_obj = NaturalLanguageParser(ollama, args.model)
+
+    try:
+        parsed = parser_obj.parse_event(text)
+
+        if args.debug:
+            import json
+            print("\nDonnées parsées:")
+            print(json.dumps(parsed, indent=2, ensure_ascii=False))
+
+        # Convert to calendar-cli arguments
+        cli_args = format_for_calendar_cli(parsed)
+
+        print(f"\nCommande: calendar-cli {' '.join(cli_args)}")
+
+        if args.dry_run:
+            print("(Mode dry-run: commande non exécutée)")
+            sys.exit(0)
+
+        # Execute calendar-cli command
+        print("\nExécution de la commande...")
+        execute_calendar_cli(cli_args, args.config_section, args.debug)
+
+        print("✓ Succès!")
+
+    except Exception as e:
+        print(f"Erreur: {e}", file=sys.stderr)
+        if args.debug:
+            import traceback
+            traceback.print_exc()
+        sys.exit(1)
+
+
+def get_voice_input():
+    """
+    Capture voice input and convert to text
+    Requires speech_recognition module
+    """
+    try:
+        import speech_recognition as sr
+    except ImportError:
+        print("Erreur: Le module 'speech_recognition' n'est pas installé", file=sys.stderr)
+        print("Installez-le avec: pip install SpeechRecognition", file=sys.stderr)
+        return None
+
+    recognizer = sr.Recognizer()
+
+    print("Parlez maintenant... (appuyez sur Ctrl+C pour annuler)")
+
+    try:
+        with sr.Microphone() as source:
+            # Adjust for ambient noise
+            print("Calibration du microphone...")
+            recognizer.adjust_for_ambient_noise(source, duration=1)
+
+            print("Écoute...")
+            audio = recognizer.listen(source, timeout=10)
+
+        print("Transcription...")
+
+        # Try different recognition services
+        try:
+            # Try Google Speech Recognition (free, doesn't require API key)
+            text = recognizer.recognize_google(audio, language='fr-FR')
+            return text
+        except sr.UnknownValueError:
+            print("Impossible de comprendre l'audio", file=sys.stderr)
+            return None
+        except sr.RequestError as e:
+            print(f"Erreur du service de reconnaissance vocale: {e}", file=sys.stderr)
+            # Fallback to Sphinx (offline, less accurate)
+            try:
+                text = recognizer.recognize_sphinx(audio, language='fr-FR')
+                return text
+            except:
+                return None
+
+    except KeyboardInterrupt:
+        print("\nAnnulé par l'utilisateur")
+        return None
+    except Exception as e:
+        print(f"Erreur lors de la capture vocale: {e}", file=sys.stderr)
+        return None
+
+
+def execute_calendar_cli(cli_args, config_section='default', debug=False):
+    """
+    Execute calendar-cli command programmatically
+
+    Args:
+        cli_args: List of command-line arguments (e.g., ['calendar', 'add', ...])
+        config_section: Configuration section to use
+        debug: Enable debug output
+    """
+    # Read calendar-cli configuration
+    try:
+        config = read_config()
+        if config_section not in config:
+            print(f"Avertissement: Section de configuration '{config_section}' introuvable", file=sys.stderr)
+            if 'default' not in config:
+                print("Erreur: Aucune configuration trouvée. Exécutez 'calendar-cli --interactive-config'", file=sys.stderr)
+                sys.exit(1)
+            config_section = 'default'
+
+        section_config = config[config_section]
+
+    except Exception as e:
+        print(f"Erreur lors de la lecture de la configuration: {e}", file=sys.stderr)
+        print("Exécutez 'calendar-cli --interactive-config' pour configurer", file=sys.stderr)
+        sys.exit(1)
+
+    # Build full argv for calendar-cli
+    full_argv = ['calendar-cli']
+
+    # Add configuration options
+    if section_config.get('url'):
+        full_argv.extend(['--caldav-url', section_config['url']])
+    if section_config.get('username'):
+        full_argv.extend(['--caldav-user', section_config['username']])
+    if section_config.get('password'):
+        full_argv.extend(['--caldav-pass', section_config['password']])
+    if section_config.get('calendar_url'):
+        full_argv.extend(['--calendar-url', section_config['calendar_url']])
+
+    # Add the command
+    full_argv.extend(cli_args)
+
+    if debug:
+        print(f"\nArguments complets: {full_argv}")
+
+    # Replace sys.argv temporarily
+    old_argv = sys.argv
+    sys.argv = full_argv
+
+    try:
+        # Call calendar-cli main function
+        legacy.main()
+    finally:
+        sys.argv = old_argv
+
+
+if __name__ == '__main__':
+    main()

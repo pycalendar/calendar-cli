@@ -26,7 +26,7 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: CGI Tools/Libraries",
     ],
-    scripts=['bin/calendar-cli.py', 'bin/calendar-cli'],
+    scripts=['bin/calendar-cli.py', 'bin/calendar-cli', 'bin/calendar-ai'],
     install_requires=[
         'icalendar',
         'caldav>=0.12-dev0',
@@ -36,7 +36,11 @@ setup(
         'tzlocal',
         'Click',
         'six',
-        'vobject'
+        'vobject',
+        'requests',  ## Required for Ollama integration
     ],
+    extras_require={
+        'voice': ['SpeechRecognition', 'pyaudio'],  ## Optional voice recognition support
+    },
    **metadata_
 )
