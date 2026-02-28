@@ -36,6 +36,7 @@ setup(
         'tzlocal',
         'Click',
         'six',
+        'urllib3',
         'vobject'
     ],
    **metadata_
