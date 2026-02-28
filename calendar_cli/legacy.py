@@ -36,7 +36,6 @@ import os
 import logging
 import sys
 import re
-import urllib3
 from getpass import getpass
 from six import PY3
 
@@ -907,9 +906,6 @@ def main():
     else:
 
         caldav_conn = None
-
-    if args.ssl_verify_cert == 'no':
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     if hasattr(args, 'func'):
         return args.func(caldav_conn, args)
