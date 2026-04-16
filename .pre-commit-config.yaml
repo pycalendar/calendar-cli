@@ -1,0 +1,11 @@
+repos:
+  - repo: https://github.com/pycalendar/ai-prompt-auto-commit
+    rev: v0.0.5
+    hooks:
+      - id: unstage-ai-prompts
+      - id: append-ai-prompts
+        stages: [prepare-commit-msg]
+      - id: archive-ai-prompts
+        stages: [post-commit]
+      - id: prepare-ai-repository
+        stages: [manual]
