@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "calendar-cli"
+dynamic = ["version"]
+description = "Simple command-line CalDav client, for adding and browsing calendar items, todo list items, etc."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "Tobias Brox", email = "t-calendar-cli@tobixen.no" }]
+maintainers = [{ name = "Tobias Brox", email = "t-calendar-cli@tobixen.no" }]
+classifiers = [
+    "Environment :: Web Environment",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: POSIX",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: CGI Tools/Libraries",
+]
+dependencies = [
+    "icalendar",
+    "caldav>=0.12-dev0",
+    "pytz",  # pytz is supposed to be obsoleted, but see https://github.com/collective/icalendar/issues/333
+    "pyyaml",
+    "tzlocal",
+    "Click",
+    "six",
+    "vobject",
+]
+
+[project.scripts]
+calendar-cli = "calendar_cli.legacy:main"
+
+[project.urls]
+Repository = "https://github.com/tobixen/calendar-cli"
+Issues = "https://github.com/tobixen/calendar-cli/issues"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "calendar_cli/_version.py"
+
+[tool.hatch.build]
+# Never ship editor backups / autosave files even if they linger in the tree.
+exclude = [
+    "*~",
+    "#*#",
+    ".#*",
+    "*.orig",
+    "*.bak",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["calendar_cli"]
+
+[tool.hatch.build.targets.sdist]
+include = ["calendar_cli", "bin", "README.md", "LICENSE.TXT"]

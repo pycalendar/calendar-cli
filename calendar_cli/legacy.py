@@ -40,7 +40,22 @@ from getpass import getpass
 from six import PY3
 
 from calendar_cli.metadata import metadata
-__version__ = metadata["version"]
+
+## The version is derived from git tags by hatch-vcs.  Prefer the installed
+## package metadata; fall back to the build-generated _version.py (present in
+## built/installed trees) and finally to "unknown" when running from a bare
+## source checkout that has neither.
+try:
+    from importlib.metadata import version as _pkg_version, PackageNotFoundError
+    try:
+        __version__ = _pkg_version("calendar-cli")
+    except PackageNotFoundError:
+        try:
+            from calendar_cli._version import __version__
+        except ImportError:
+            __version__ = "unknown"
+except ImportError:
+    __version__ = "unknown"
 
 UTC = pytz.utc
 #UTC = zoneinfo.ZoneInfo('UTC')
@@ -724,7 +739,7 @@ def main():
     conf_parser.add_argument("--interactive-config",
                              help="Interactively ask for configuration", action="store_true")
     args, remaining_argv = conf_parser.parse_known_args()
-    conf_parser.add_argument("--version", action='version', version='%%(prog)s %s' % metadata["version"])
+    conf_parser.add_argument("--version", action='version', version='%%(prog)s %s' % __version__)
 
     config = read_config(args.config_file)
 
