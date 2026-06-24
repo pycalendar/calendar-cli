@@ -1,5 +1,7 @@
+## NOTE: the package version is no longer stored here.  It is derived from
+## git tags at build time by hatch-vcs and read at runtime from the installed
+## package metadata (see calendar_cli/legacy.py).
 metadata = {
-    "version": "1.0.1",
     "author": "Tobias Brox",
     "author_short": "tobixen",
     "copyright": "Copyright 2013-2022, Tobias Brox and contributors",

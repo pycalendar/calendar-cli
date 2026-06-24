@@ -1,0 +1,16 @@
+# Version file generated at build time by hatch-vcs
+calendar_cli/_version.py
+
+# Editor backups / autosave files
+*~
+\#*\#
+.\#*
+*.orig
+*.bak
+
+# Python build artifacts
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.py[cod]
