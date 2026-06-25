@@ -52,8 +52,9 @@ Installation
 ------------
 
 `calendar-cli` depends on quite some python libraries, i.e. pytz, caldav, etc.
-"sudo ./setup.py install" should take care of all those eventually, and will
-also make an executable under /usr/bin
+Run `make install` — it auto-detects `uv`, `pipx` or `pip` and installs the
+package together with all its dependencies, exposing a `calendar-cli`
+executable.  Dependencies are declared in `pyproject.toml`.
 
 Support
 -------

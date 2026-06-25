@@ -1,0 +1,64 @@
+name: Link check
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "03 22 * * *"
+
+concurrency:
+  group: linkcheck-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  linkcheck:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+    - uses: actions/checkout@v5
+    - name: Restore lychee cache
+      uses: actions/cache@v4
+      with:
+        path: .lycheecache
+        key: cache-lychee-${{ github.run_id }}
+        restore-keys: cache-lychee-
+    - name: Check links with Lychee
+      id: lychee
+      uses: lycheeverse/lychee-action@v2
+      with:
+        fail: false
+        args: >-
+          --timeout 30
+          --max-retries 6
+          --retry-wait-time 2
+          --cache
+          --max-cache-age 14d
+          .
+    - name: Create or update Link Checker issue
+      if: steps.lychee.outputs.exit_code != 0 && github.ref == 'refs/heads/master'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Keep the oldest open report issue as canonical, fold duplicates in.
+        ISSUES=$(gh issue list --label "report" --state open --json number --jq '.[].number' | sort -n)
+        CANON=$(printf '%s\n' "$ISSUES" | head -1)
+        for n in $(printf '%s\n' "$ISSUES" | tail -n +2); do
+          gh issue close "$n" --comment "Duplicate of #${CANON} - auto-closed by the link checker."
+        done
+        if [ -n "$CANON" ]; then
+          gh issue edit "$CANON" --body-file ./lychee/out.md
+        else
+          gh issue create --title "Link Checker Report" --body-file ./lychee/out.md --label "report"
+        fi
+    - name: Close Link Checker issue if all links are healthy
+      if: steps.lychee.outputs.exit_code == 0 && github.ref == 'refs/heads/master'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        for n in $(gh issue list --label "report" --state open --json number --jq '.[].number'); do
+          gh issue close "$n" --comment "All links are now healthy."
+        done

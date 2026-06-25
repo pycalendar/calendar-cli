@@ -30,6 +30,9 @@ dependencies = [
     "vobject",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.15", "pre-commit>=4.0"]
+
 [project.scripts]
 calendar-cli = "calendar_cli.legacy:main"
 
@@ -58,3 +61,20 @@ packages = ["calendar_cli"]
 
 [tool.hatch.build.targets.sdist]
 include = ["calendar_cli", "bin", "README.md", "LICENSE.TXT"]
+
+[tool.ruff]
+# calendar-cli is a deliberately "legacy / long term support" codebase, so we
+# do not enforce stylistic rules (line length, etc.) that would force a large
+# reformat.  Ruff is scoped to catching genuine errors.
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["F", "E9", "W605"]
+# F841 (assigned-but-never-used) flags some legacy local variables we don't
+# want to rewrite blindly; revisit when the surrounding code is refactored.
+ignore = ["F841"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
