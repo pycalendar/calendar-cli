@@ -5,7 +5,6 @@ This does not really belong in the calendar-cli package.  I was
 googling a bit, and didn't find anything like this out there ... but
 I'm sure there must exist something like this?"""
 
-import datetime
 import string
 import re
 
