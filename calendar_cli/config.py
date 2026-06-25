@@ -1,10 +1,13 @@
 import logging
 import json
+import os
+import time
 import yaml
 from fnmatch import fnmatch
+from getpass import getpass
 
 def interactive_config(args, config, remaining_argv):
-    import readline
+    import readline  # noqa: F401  (importing enables line editing in input())
 
     new_config = False
     section = 'default'
@@ -25,7 +28,7 @@ def interactive_config(args, config, remaining_argv):
             section = args.config_section
         else:
             ## TODO: tab completion
-            section = raw_input("Chose one of those, or a new name / no name for a new configuration section: ")
+            section = input("Chose one of those, or a new name / no name for a new configuration section: ")
         if section in config:
             backup = config[section].copy()
         print("Using section " + section)
@@ -42,7 +45,7 @@ def interactive_config(args, config, remaining_argv):
             value = getpass(prompt="Enter new value (or just enter to keep the old): ")
         else:
             print("Config option %s - old value: %s" % (config_key, config[section].get(config_key, '(None)')))
-            value = raw_input("Enter new value (or just enter to keep the old): ")
+            value = input("Enter new value (or just enter to keep the old): ")
 
         if value:
             config[section][config_key] = value
@@ -64,12 +67,12 @@ def interactive_config(args, config, remaining_argv):
             print("CONFIGURATION DONE ...")
             for o in options:
                 print("Type %s if you want to %s" % o)
-            cmd = raw_input("Enter a command: ")
+            cmd = input("Enter a command: ")
             if cmd in ('use', 'abort'):
                 state = 'done'
             if cmd in ('save', 'save_other'):
                 if cmd == 'save_other':
-                    new_section = raw_input("New config section name: ")
+                    new_section = input("New config section name: ")
                     config[new_section] = config[section]
                     if backup:
                         config[section] = backup
