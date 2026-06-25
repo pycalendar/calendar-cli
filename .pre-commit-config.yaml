@@ -1,4 +1,5 @@
 repos:
+  # === ai-prompt-auto-commit: record Claude Code prompts in commit messages ===
   - repo: https://github.com/pycalendar/ai-prompt-auto-commit
     rev: v0.0.5
     hooks:
@@ -9,3 +10,59 @@ repos:
         stages: [post-commit]
       - id: prepare-ai-repository
         stages: [manual]
+
+  # === PRE-COMMIT STAGE (quick checks on every commit) ===
+  # NOTE: ruff-format is intentionally omitted. calendar_cli is a legacy/LTS
+  # codebase and we do not want a wholesale reformat; ruff lint (scoped to real
+  # errors in pyproject.toml) is enough.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.19
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  # === COMMIT-MSG: Enforce Conventional Commits ===
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+
+  # === PRE-PUSH: full test suite before pushing ===
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+  # === PRE-PUSH: prevent direct pushes to master (mature, v1+ project) ===
+  # Bypass with: git push --no-verify
+  - repo: local
+    hooks:
+      - id: no-push-to-main
+        name: Prevent direct push to master branch
+        entry: bash -c 'branch=$(git rev-parse --abbrev-ref HEAD); if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then echo "Direct pushes to $branch are not allowed. Use --no-verify to bypass."; exit 1; fi'
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+  # === PRE-PUSH: link checker (cached for speed; config in lychee.toml) ===
+  - repo: https://github.com/lycheeverse/lychee
+    rev: lychee-v0.24.2
+    hooks:
+      - id: lychee
+        args: ["--no-progress", "--timeout", "10", "--cache", "--max-cache-age", "1d", "."]
+        pass_filenames: false
+        stages: [pre-push]
