@@ -21,7 +21,6 @@ import tzlocal
 #except:
 #    from backports import zoneinfo
 import pytz
-import time
 from datetime import datetime, timedelta, date
 from datetime import time as time_
 import dateutil.parser
@@ -31,12 +30,10 @@ from calendar_cli.config import interactive_config, config_section, read_config
 import vobject
 import caldav
 import uuid
-import json
 import os
 import logging
 import sys
 import re
-from getpass import getpass
 from six import PY3
 
 from calendar_cli.metadata import metadata
@@ -682,9 +679,9 @@ def todo_complete(caldav_conn, args):
                 remaining_task.instance.vtodo.dtstart.value = next ## TODO: should be same type as dtstart (date or datetime)
                 remaining_task.instance.vtodo.recurrence_id.params['RANGE'] = [ 'THISANDFUTURE' ]
                 remaining_task.instance.vtodo.rrule
-                count_search = re.search('COUNT=(\d+)', completed_task.instance.vtodo.rrule.value)
+                count_search = re.search(r'COUNT=(\d+)', completed_task.instance.vtodo.rrule.value)
                 if count_search:
-                    remaining_task.instance.vtodo.rrule.value = re.replace('COUNT=(\d+)', 'COUNT=%d' % int(count_search.group(1))-1)
+                    remaining_task.instance.vtodo.rrule.value = re.replace(r'COUNT=(\d+)', 'COUNT=%d' % int(count_search.group(1))-1)
                 remaining_task.save()
 
                 ## the completed task should have recurrence id set to current time

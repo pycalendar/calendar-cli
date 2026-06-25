@@ -1,8 +1,7 @@
-import pytest
 import sys
 sys.path.insert(0,'.')
 sys.path.insert(1,'..')
-from datetime import datetime, date
+from datetime import date
 from calendar_cli.template import Template
 
 """calendar-cli is a command line utility, and it's an explicit design
