@@ -12,20 +12,29 @@ error() {
 }
 
 find_executable_to_test() {
-    local candidate
+    local candidate root
 
+    ## Prefer the installed console-script entry point (created by
+    ## `pip install` / `make install`); it needs no PYTHONPATH.
+    if command -v calendar-cli >/dev/null 2>&1; then
+        echo "calendar-cli"
+        return 0
+    fi
+
+    ## Otherwise run from a source checkout via bin/calendar-cli.py, wrapping it
+    ## with PYTHONPATH pointing at the repo root so `import calendar_cli` works.
     for candidate in \
-        './calendar-cli.py' \
-        '../calendar-cli.py' \
-        './bin/calendar-cli.py'
+        './bin/calendar-cli.py' \
+        '../bin/calendar-cli.py'
     do
         if [ -x "$candidate" ]; then
-            echo "$candidate"
+            root=$(dirname "$(dirname "$candidate")")
+            echo "env PYTHONPATH=$root:$PYTHONPATH $candidate"
             return 0
         fi
     done
 
-    error "couldn't find ./calendar_cli.py nor ../calendar_cli.py"
+    error "couldn't find an installed 'calendar-cli' nor bin/calendar-cli.py"
 }
 
 set_test_command() {
