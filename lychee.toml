@@ -1,11 +1,11 @@
 # Configuration for the lychee link checker (auto-discovered by both the
 # pre-commit hook and the GitHub Action).
 
-# Don't try to "resolve" mailto: links.
-exclude_mail = true
+# Don't check mailto: links (this is lychee's default; set explicitly).
+include_mail = false
 
 # Treat these HTTP status codes as success.
-accept = ["200", "206", "429"]
+accept = [200, 206, 429]
 
 # Example/placeholder hosts and other URLs that are not meant to resolve.
 exclude = [
@@ -13,4 +13,6 @@ exclude = [
     "example\\.org",
     "localhost",
     "127\\.0\\.0\\.1",
+    # documentation placeholder used in README.md
+    "some\\.davical\\.server",
 ]

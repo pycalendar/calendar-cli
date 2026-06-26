@@ -243,8 +243,8 @@ should be set to 21:00 at New Years eve.  Now, that's just silly!  But yeah,
 the DTSTART has a meaning: that's the time you need to drop everything else if
 you didn't do the task yet.
 
-I have some more thoughts on project management in the other document,
-[NEXT_LEVEL](NEXT_LEVEL.md).
+I have some more thoughts on project management over at the next-generation
+CLI project, [plann](https://plann.no).
 
 Priority
 --------
@@ -256,18 +256,18 @@ it's "medium high" and 6-10 means the priority is "low".
 
 Should tasks be done in the order of their priority?  Probably not, as there is
 also the DUE-date to consider.  I do have some ideas on how to sort and
-organize tasks in the [NEXT_LEVEL](NEXT_LEVEL.md) document.  To follow the
+organize tasks over at [plann](https://plann.no).  To follow the
 thoughts there, let priority be defined as such:
 
-1: The DUE timestamp MUST be met, come hell or high water.  
-2: The DUE timestamp SHOULD be met, if we lose it the task becomes irrelevant.  
+1: The DUE timestamp MUST be met, come hell or high water.
+2: The DUE timestamp SHOULD be met, if we lose it the task becomes irrelevant.
 3: The DUE timestamp SHOULD be met, but worst case we can probably
-   procrastinate it, perhaps we can apply for an extended deadline.  
-4: The deadline SHOULD NOT be pushed too much  
+   procrastinate it, perhaps we can apply for an extended deadline.
+4: The deadline SHOULD NOT be pushed too much
 5: If the deadline approaches and we have higher-priority tasks that needs to
-   be done, then this task can be procrastinated.  
+   be done, then this task can be procrastinated.
 6: The DUE is advisory only and expected to be pushed - but it would be nice if
-   the task gets done within reasonable time.  
+   the task gets done within reasonable time.
 7-9: Low-priority task, it would be nice if the task gets done at all ... but
      the DUE is overly optimistic and expected to be pushed several times.
 
